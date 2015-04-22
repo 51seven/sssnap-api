@@ -36,7 +36,7 @@ logger.add(winston.transports.Console, {
 
     var hh = (d.getHours() < 10) ? "0" + d.getHours() : d.getHours();
     var mm = (d.getMinutes() < 10) ? "0" + d.getMinutes() : d.getMinutes();
-    var ss = (d.getSeconds() < 10) ? "0" + d.getSeconds() : d.getSeconds(); 
+    var ss = (d.getSeconds() < 10) ? "0" + d.getSeconds() : d.getSeconds();
 
     return "[" + dd + "/" + mm + "/" + yyyy + " " + hh + ":" + mm + ":" + ss + "]";
   }

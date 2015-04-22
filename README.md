@@ -63,7 +63,7 @@ There's a global Logging-Method accessible in all files. It's the [winston logge
 - `Log.w()`  
   Log on warn level
 
-- `Log.e`  
+- `Log.e()`  
   Log on error level
 
 
