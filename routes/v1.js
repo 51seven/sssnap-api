@@ -10,14 +10,21 @@ var router = express.Router();
 
 router.use(AuthenticationController.someMethod);
 
+// Uploads
 router.route('/uploads/:upload_id')
-.get(UploadsController.read)
-.put(UploadsController.update)
-.delete(UploadsController.delete);
+	.get(UploadsController.read)
+	.put(UploadsController.update)
+	.delete(UploadsController.delete);
 
 router.route('/uploads/')
-.get(UploadsController.list)
-.post(UploadsController.create);
+	.get(UploadsController.list)
+	.post(UploadsController.create);
+
+
+// Users
+router.route('/users/:user_id')
+	.get(UserController.read) // Get user information
+	.put(UserController.update) // Update a user
 
 
 module.exports = router;
