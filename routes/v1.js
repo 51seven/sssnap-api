@@ -26,5 +26,8 @@ router.route('/users/:user_id')
 	.get(UserController.read) // Get user information
 	.put(UserController.update) // Update a user
 
+router.route('/users/')
+	.post(UserController.create) // Create a user
+
 
 module.exports = router;
