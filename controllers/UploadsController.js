@@ -20,4 +20,3 @@ module.exports.delete = function (req, res, next) {
 module.exports.list = function (req, res, next) {
   res.send('GET /uploads/');
 }
-
