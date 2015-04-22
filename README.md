@@ -30,11 +30,22 @@ Configuration of modules and other key-value based configurations.
 - **routes/**  
 The versioned routes, which will redirect to the appropriate controller.
 
-- **models/**  
-Models – are initialized in server.js
-
 - **controllers/**  
 Controllers – are connected with the routes.
+
+
+## Models
+
+To be always and everywhere up-to-date with the database schema, the models are a separate node module and can be found in [51seven/sssnap-models](https://github.com/51seven/sssnap-models). You can work with them like normal mongoose models.
+
+```js
+
+var User = require('sssnap-models').Users;
+
+Users.findOne({ email: 'test@test.com '}, function (err, user) {
+    ...
+});
+```
 
 ## Included Methods
 
