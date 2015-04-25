@@ -1,6 +1,7 @@
 var express = require('express');
 
 var UploadsController        = require('../controllers/UploadsController');
+var UsersController        = require('../controllers/UsersController');
 var AuthenticationController = require('../controllers/AuthenticationController');
 
 var router = express.Router();
@@ -8,7 +9,7 @@ var router = express.Router();
 // ROUTE: /1/
 // =========================================================
 
-router.use(AuthenticationController.someMethod);
+router.use(AuthenticationController.authentication);
 
 // Uploads
 router.route('/uploads/:upload_id')
@@ -22,12 +23,11 @@ router.route('/uploads/')
 
 
 // Users
-router.route('/users/:user_id')
-	.get(UserController.read) // Get user information
-	.put(UserController.update) // Update a user
-
+// We recieve the current user from the Provider's AccessToken
 router.route('/users/')
-	.post(UserController.create) // Create a user
+  .put(UsersController.update); // Update a user
 
+router.route('/users/me')
+  .get(UsersController.read); // Get user information
 
 module.exports = router;
