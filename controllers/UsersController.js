@@ -27,10 +27,10 @@ module.exports.update = function (req, res, next) {
   res.send('PUT /users/' + res.params.user_id);
 }
 
-
+/*
 function getUser(user) {
   return new Promise(function(resolve, reject) {
-    /* istanbul ignore else  */
+    // istanbul ignore else
     if(env === 'devaelopment' || env === 'test') {
       resolve(user);
     }
@@ -62,4 +62,4 @@ function getUser(user) {
       });
     }
   });
-}
+}*/

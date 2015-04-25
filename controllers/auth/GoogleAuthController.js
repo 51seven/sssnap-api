@@ -27,8 +27,7 @@ module.exports = function(req, res, next) {
   }
 
   if (access_token === undefined) {
-    //return next(new status.Forbidden('Access token not found', 'You have to send an access token from a supported provider in the HTTP Authorization Header or in the URL.'));
-    return next('Access token not found - You have to send an access token from a supported provider in the HTTP Authorization Header or in the URL.');
+    throw new status.Forbidden('Access token not found - You have to send an access token from a supported provider in the HTTP Authorization Header or in the URL.');
   }
 
   google.callAPI('/oauth2/v1/tokeninfo?access_token=' + access_token, access_token)

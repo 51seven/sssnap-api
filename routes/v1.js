@@ -12,7 +12,7 @@ var router = express.Router();
 router.use(AuthenticationController.authentication);
 
 // Uploads
-router.route('/uploads/:upload_id')
+router.route('/uploads/:hash')
 	.get(UploadsController.read)
 	.put(UploadsController.update)
 	.delete(UploadsController.delete);
