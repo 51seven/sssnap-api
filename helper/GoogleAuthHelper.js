@@ -5,6 +5,7 @@
 var https = require('https');
 var Promise = require('bluebird');
 var status = require('./StatusHelper');
+var Response = require('./ResponseHelper');
 
 /* istanbul ignore next */
 exports.callAPI = function(path, access_token) {
@@ -27,7 +28,8 @@ exports.callAPI = function(path, access_token) {
         var resJSON = JSON.parse(body);
 
         if(resJSON.error === 'invalid_token') {
-          reject(new status.Forbidden('Invalid access token', 'The access token is invalid. Probably the access token is expired.'));
+          reject(new Response.error('INVALID_ACCESS_TOKEN', 'The access token is invalid. Probably the access token is expired.'));
+          //reject(new status.Forbidden('Invalid access token', 'The access token is invalid. Probably the access token is expired.'));
         }
         else {
           resolve(resJSON);
@@ -35,7 +37,7 @@ exports.callAPI = function(path, access_token) {
       });
 
     }).on('error', function(err) {
-      reject(new status.Forbidden('Internal error', 'An error is encountered during the request to www.googleapis.com. This will most likely be an error on TCP level. It does not happen often, but maybe Google is down?'));
+      reject(new Response.error('INTERNAL_ERROR', 'An error is encountered during the request to www.googleapis.com. This will most likely be an error on TCP level. It does not happen often, but maybe Google is down?'));
     });
   });
 }

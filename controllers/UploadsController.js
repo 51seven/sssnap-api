@@ -1,6 +1,5 @@
 var Uploads = require('sssnap-models').Uploads;
-
-
+var Response = require('../helper/ResponseHelper');
 
 module.exports.create = function (req, res, next) {
   res.send('POST /uploads/');
@@ -9,10 +8,10 @@ module.exports.create = function (req, res, next) {
 module.exports.read = function (req, res, next) {
   Uploads.read(req.params.hash)
   .then(function (upload) {
-    res.send(upload);
+    next(new Response.ok(upload));
   })
   .catch(function (err) {
-    res.send(err);
+    next(new Response.error('NOT_FOUND', err));
   });
 }
 
@@ -27,9 +26,9 @@ module.exports.delete = function (req, res, next) {
 module.exports.list = function (req, res, next) {
   Uploads.list(req.user._id, req.query.limit, req.query.skip)
   .then(function (uploads) {
-    res.send(uploads);
+    next(new Response.ok(uploads));
   })
   .catch(function (err) {
-    res.send(err);
+    next(new Response.error('NOT_FOUND', err));
   });
 }

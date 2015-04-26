@@ -1,7 +1,8 @@
 var Promise   = require('bluebird')
 
 // Helper
-var google = require('../helper/GoogleAuthHelper');
+var google    = require('../helper/GoogleAuthHelper');
+var Response  = require('../helper/ResponseHelper');
 
 // Models
 var Users     = require('sssnap-models').Users;
@@ -16,10 +17,10 @@ var env       = process.env.NODE_ENV || "development";
 module.exports.read = function (req, res, next) {
   Users.read(req.user._id)
   .then(function (user) {
-    res.send(user);
+    next(new Response.ok(user));
   })
   .catch(function (err) {
-    res.send(err);
+    next(new Response.error('NOT_FOUND', err));
   });
 }
 

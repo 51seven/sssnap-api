@@ -80,7 +80,21 @@ app.use('/1', api1);
 // =========================================================
 
 if ('development' === env)
-  app.use(errorhandler());
+  //app.use(errorhandler());
+
+app.use(function (data, req, res, next) {
+
+  if(data.status !== undefined && data.status == 'ok') {
+    res.json(data);
+  }
+  else if(data.status !== undefined && data.status == 'error') {
+    res.status(data.code);
+    res.json(data);
+  }
+  else {
+    res.status(500);
+  }
+});
 
 
 // WEBSERVER
