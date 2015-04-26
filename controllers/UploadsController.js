@@ -25,7 +25,7 @@ module.exports.delete = function (req, res, next) {
 }
 
 module.exports.list = function (req, res, next) {
-  Uploads.list(req.user._id)
+  Uploads.list(req.user._id, req.query.limit, req.query.skip)
   .then(function (uploads) {
     res.send(uploads);
   })
