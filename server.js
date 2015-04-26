@@ -83,11 +83,10 @@ if ('development' === env)
   //app.use(errorhandler());
 
 app.use(function (data, req, res, next) {
-
-  if(data.status !== undefined && data.status == 'ok') {
+  if(data.status !== undefined && data.status === 'ok') {
     res.json(data);
   }
-  else if(data.status !== undefined && data.status == 'error') {
+  else if(data.status !== undefined && data.status === 'error') {
     res.status(data.code);
     res.json(data);
   }
