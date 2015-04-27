@@ -95,7 +95,7 @@ app.use(function (req, res, next) {
   }
   else {
     res.status(404);
-    res.json(new Response.error('NOT_FOUND', 'Ressource not found.'));
+    res.json(new Response.error('NOT_FOUND', "'"+req.hostname+req.originalUrl + "' not found."));
   }
 });
 
