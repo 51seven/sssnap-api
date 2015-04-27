@@ -1,14 +1,14 @@
 var express = require('express');
 
-var UploadsController        = require('../controllers/UploadsController');
-var UsersController        = require('../controllers/UsersController');
 var AuthenticationController = require('../controllers/AuthenticationController');
+var UploadsController        = require('../controllers/UploadsController');
+var UsersController          = require('../controllers/UsersController');
+
 
 var router = express.Router();
 
 // ROUTE: /1/
 // =========================================================
-
 router.use(AuthenticationController.authentication);
 
 // Uploads

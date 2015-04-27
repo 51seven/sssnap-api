@@ -7,7 +7,6 @@ var mongoose = require('mongoose');
 
 // Helper
 var google = require('../../helper/GoogleAuthHelper');
-var status = require('../../helper/StatusHelper');
 
 var User = mongoose.model('User');
 

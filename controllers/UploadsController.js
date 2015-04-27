@@ -2,33 +2,40 @@ var Uploads = require('sssnap-models').Uploads;
 var Response = require('../helper/ResponseHelper');
 
 module.exports.create = function (req, res, next) {
-  res.send('POST /uploads/');
+  return next(new Response.error('NOT_IMPLEMENTED', 'Stay tuned!'));
 }
 
 module.exports.read = function (req, res, next) {
   Uploads.read(req.params.hash)
   .then(function (upload) {
-    next(new Response.ok(upload));
+    req.response = new Response.ok(upload);
+    return next();
+  })
+  .catch(Response.NOT_FOUND, function () {
+    return next(new Response.error('NOT_FOUND', 'Upload not found.'));
   })
   .catch(function (err) {
-    next(new Response.error('NOT_FOUND', err));
+    return next(new Response.error('INTERNAL_SERVER_ERROR', err));
   });
-}
-
-module.exports.update = function (req, res, next) {
-  res.send('PUT /uploads/' + res.params.upload_id);
-}
-
-module.exports.delete = function (req, res, next) {
-  res.send('DELETE /uploads/' + res.params.upload_id);
 }
 
 module.exports.list = function (req, res, next) {
   Uploads.list(req.user._id, req.query.limit, req.query.skip)
   .then(function (uploads) {
-    next(new Response.ok(uploads));
+    req.response = new Response.ok(uploads);
+    return next();
   })
   .catch(function (err) {
-    next(new Response.error('NOT_FOUND', err));
+    return next(new Response.error('INTERNAL_SERVER_ERROR', err));
   });
 }
+
+module.exports.update = function (req, res, next) {
+  return next(new Response.error('NOT_IMPLEMENTED', 'Stay tuned!'));
+}
+
+module.exports.delete = function (req, res, next) {
+  return next(new Response.error('NOT_IMPLEMENTED', 'Stay tuned!'));
+}
+
+

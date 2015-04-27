@@ -4,7 +4,6 @@
 
 var https = require('https');
 var Promise = require('bluebird');
-var status = require('./StatusHelper');
 var Response = require('./ResponseHelper');
 
 /* istanbul ignore next */
@@ -29,7 +28,6 @@ exports.callAPI = function(path, access_token) {
 
         if(resJSON.error === 'invalid_token') {
           reject(new Response.error('INVALID_ACCESS_TOKEN', 'The access token is invalid. Probably the access token is expired.'));
-          //reject(new status.Forbidden('Invalid access token', 'The access token is invalid. Probably the access token is expired.'));
         }
         else {
           resolve(resJSON);

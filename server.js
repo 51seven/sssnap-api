@@ -10,8 +10,8 @@ var multer            = require('multer');
 var methodOverride    = require('method-override');
 var morgan            = require('morgan');
 var expressValidator  = require('express-validator');
-var errorhandler      = require('errorhandler');
 var mongoose          = require('mongoose');
+var Response          = require('./helper/ResponseHelper');
 
 var env       = process.env.NODE_ENV || "development";
 var secrets   = require('./config/secrets');
@@ -78,20 +78,24 @@ app.use('/1', api1);
 
 // ERROR HANDLING
 // =========================================================
-
-if ('development' === env)
-  //app.use(errorhandler());
-
-app.use(function (data, req, res, next) {
-  if(data.status !== undefined && data.status === 'ok') {
-    res.json(data);
-  }
-  else if(data.status !== undefined && data.status === 'error') {
-    res.status(data.code);
-    res.json(data);
+app.use(function (err, req, res, next) {
+  if(err) {
+    res.status(err.code);
+    res.json(err);
   }
   else {
-    res.status(500);
+    console.log("no err");
+    next();
+  }
+});
+
+app.use(function (req, res, next) {
+  if(req.response !== undefined) {
+    res.json(req.response);
+  }
+  else {
+    res.status(404);
+    res.json(new Response.error('NOT_FOUND', 'Ressource not found.'));
   }
 });
 

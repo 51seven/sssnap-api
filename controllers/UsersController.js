@@ -17,15 +17,18 @@ var env       = process.env.NODE_ENV || "development";
 module.exports.read = function (req, res, next) {
   Users.read(req.user._id)
   .then(function (user) {
-    next(new Response.ok(user));
+    return next(new Response.ok(user));
+  })
+  .catch(Response.NOT_FOUND, function () {
+    return next(new Response.error('NOT_FOUND', 'User not found.'));
   })
   .catch(function (err) {
-    next(new Response.error('NOT_FOUND', err));
+    return next(new Response.error('INTERAL_SERVER_ERROR', err));
   });
 }
 
 module.exports.update = function (req, res, next) {
-  res.send('PUT /users/' + res.params.user_id);
+  return next(new Response.error('NOT_IMPLEMENTED', 'Stay tuned!'));
 }
 
 /*

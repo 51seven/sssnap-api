@@ -1,14 +1,7 @@
-exports.ok = function(payload) {
-  var response = {
-    status: "ok",
-    payload: payload
-  }
+var _ = require('lodash');
 
-  return response;
-}
-
+// Error Codes
 var codes = {
-  NO_CONTENT: 204,
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   INVALID_ACCESS_TOKEN: 401,
@@ -17,23 +10,48 @@ var codes = {
   NOT_FOUND: 404,
   METHOD_NOT_ALLOWED: 405,
   UNSUPPORTED_MEDIA_TYPE: 415,
-  INTERNAL_ERROR: 500
+  INTERNAL_ERROR: 500,
+  NOT_IMPLEMENTED: 501
 }
 
-exports.error = function(error, message) {
-
-  var response = {
-    status: "error",
-    error: error,
-    error_message: message
-  }
-
-  if(codes[error] !== undefined) {
-    response.code = codes[error];
-  }
-  else {
-    response.code = 400;
-  }
-
-  return response;
+// Exposed Module
+var ResponseHelper = {
+  ok: SuccessResponse,
+  error: FailureResponse
 }
+
+// ResponseHelper.ok()
+function SuccessResponse(payload) {
+  this.status = "ok";
+  this.payload = payload || [];
+}
+
+// ResponseHelper.error()
+function FailureResponse(error, message) {
+  this.name = error;
+
+  this.status = "error";
+  this.error = error;
+  this.message = message;
+  this.code = codes[error] || 500;
+}
+
+FailureResponse.prototype = Object.create(Error.prototype);
+FailureResponse.prototype.constructor = FailureResponse;
+
+FailureResponse.prototype.toJSON = function () {
+  return {
+    status: this.status,
+    error: this.error,
+    error_message: this.message
+  }
+}
+
+// Generated and appended check functions
+_.forEach(codes, function (code, name) {
+  ResponseHelper[name] = function (e) {
+    return (e.name === name) || (e === name);
+  }
+});
+
+module.exports = ResponseHelper;

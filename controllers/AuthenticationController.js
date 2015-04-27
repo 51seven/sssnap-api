@@ -2,12 +2,12 @@
  * Authorization provider switch
  */
 var mongoose  = require('mongoose');
-var status    = require('../helper/StatusHelper');
 
-var User      = mongoose.model('User');
+var Users     = require('sssnap-models').Users;
 
-var env       = process.env.NODE_ENV || "development";
-env = "live";
+var Response  = require('../helper/ResponseHelper');
+
+//var env       = process.env.NODE_ENV || "development";
 
 /**
  * Authenticates the user
@@ -16,7 +16,7 @@ module.exports.authentication = function (req, res, next) {
   var provider = req.get('x-auth-provider') || req.query.provider;
 
   /* istanbul ignore else  */
-  if(env === 'development' || env === 'test') {
+  /*if(env === 'development' || env === 'test') {
     var testuser = new User({
       name: {
         first: "John",
@@ -28,7 +28,7 @@ module.exports.authentication = function (req, res, next) {
       },
     });
 
-    User.create(testuser)
+    Users.create(testuser)
     .then(function (user) {
       console.log("Creating test user");
       req.user = user;
@@ -39,7 +39,7 @@ module.exports.authentication = function (req, res, next) {
         console.log("Testuser already exists. We dont need to create him.");
       }
 
-      User.findOne({ email: testuser.email }, function (err, user) {
+      Users.findOne({ email: testuser.email }, function (err, user) {
         if(user) {
           console.log("Read Testuser ("+user._id+") from database.");
           req.user = user;
@@ -55,20 +55,24 @@ module.exports.authentication = function (req, res, next) {
         }
       });
     });
-  }
+  }*/
 
   // I don't know how to test the authentication process
-  else {
+  //else {
+  // Get your tokens: https://developers.google.com/oauthplayground
 
     switch(provider) {
       case 'google':
         return require('./auth/GoogleAuthController')(req, res, next);
         break;
+      /*case: 'facebook':
+        return next(new Response.error('AUTHENTICATION_PROVIDER_NOT_SUPPORTED_YET'));
+        break;*/
       default:
         return next(new Response.error('NO_AUTHENTICATION_PROVIDER', 'You have to send the name of your provider in the HTTP header \'x-auth-provider\' or in the URL query as \'provider\'. Valid values are: google'));
     }
 
-  }
+  //}
 
   //next();
 }
