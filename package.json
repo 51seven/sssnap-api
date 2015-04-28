@@ -20,6 +20,7 @@
     "mongoose": "^4.0.1",
     "morgan": "^1.5.2",
     "multer": "^0.1.8",
+    "mv": "^2.0.3",
     "sssnap-models": "git://github.com/51seven/sssnap-models",
     "uuid": "^2.0.1",
     "winston": "^1.0.0"

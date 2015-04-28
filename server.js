@@ -63,7 +63,7 @@ if (env !== 'test')
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(multer({ dest: './incoming/' }));
+app.use(multer({ dest: './incoming/' })); // Multipart uploads are moved in this directory
 app.use(expressValidator());
 app.use(methodOverride());
 
