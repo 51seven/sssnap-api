@@ -43,7 +43,7 @@ FailureResponse.prototype.toJSON = function () {
   return {
     status: this.status,
     error: this.error,
-    error_message: this.message
+    message: this.message
   }
 }
 
