@@ -17,13 +17,15 @@ var env       = process.env.NODE_ENV || "development";
 module.exports.read = function (req, res, next) {
   Users.read(req.user._id)
   .then(function (user) {
-    return next(new Response.ok(user));
+    req.response = new Response.ok(user);
+    return next();
   })
   .catch(Response.NOT_FOUND, function () {
     return next(new Response.error('NOT_FOUND', 'User not found.'));
   })
   .catch(function (err) {
-    return next(new Response.error('INTERAL_SERVER_ERROR', err));
+    console.log(err);
+    return next(new Response.error('INTERNAL_SERVER_ERROR', err));
   });
 }
 

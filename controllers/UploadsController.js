@@ -1,9 +1,11 @@
 // Includes
 var Uploads   = require('sssnap-models').Uploads;
+var Users   = require('sssnap-models').Users;
 var Promise   = require('bluebird');
 var fs        = require('fs');
 var uuid      = require('uuid');
 var file_move = require('mv');
+var mongoose  = require('mongoose');
 
 // Helper
 var Response  = require('../helper/ResponseHelper');
@@ -37,7 +39,7 @@ module.exports.create = function (req, res, next) {
       });
     });
 
-    return next(new Response.error('BAD_REQUEST', 'Use only \'file\' as the key in your multipart/form-data request.'));
+    return next(new Response.error('NOT_ACCEPTABLE', 'Use only \'file\' as the key in your multipart/form-data request.'));
   }
 
   // we can assume, that we have only 1 file named 'file' as req.files.file
@@ -51,62 +53,85 @@ module.exports.create = function (req, res, next) {
       }
     });
 
-    return next(new Response.error('BAD_REQUEST', 'Invalid mimetype - Only image/png and image/jpeg are allowed.'));
+    return next(new Response.error('UNSUPPORTED_MEDIA_TYPE', 'Invalid mimetype - Only image/png and image/jpeg are allowed.'));
   }
 
-  var new_filename = uuid.v4();
-
-  Uploads.findOne({ filename: new_filename }, function (err, result) {
-    if(result || err) {
-      console.log('🙀 UUID DUPLICATE FOUND: '+new_filename);
-      return next(new Response.error('INTERNAL_SERVER_ERROR', 'Something went wrong.'));
+  Users.findOne({ _id: req.user._id }, function (err, user) {
+    if(!user) {
+      console.log(err);
+      return next(new Response.error('BAD_REQUEST', 'Something went wrong - Try to renew your Session.'));
     }
     else {
-      // Splitting the filename (uuid) into folder sections.
-      // We want a no performance lag and clear vision to the root folders so we seperate the first 2 digits 2 times.
-      // Described as follows:
-      // -- 74738ff5-5367-5958-9aee-98fffdcd1876
-      // --         splitting...
-      // -- [74] [73] 8ff5-5367-5958-9aee-98fffdcd1876
-      // --         turns into
-      // -- ./74/73/8ff5-5367-5958-9aee-98fffdcd1876
+      // Check if the user has neough space left
+      if((user.quota.used + file.size) > user.quota.total) {
+        return next(new Response.error('FORBIDDEN', 'Plan limit reached - Not enough space left to upload this file.'));
+      }
 
-      var firstfolder   = new_filename.substring(0, 2)+"/";
-      var secondfolder  = new_filename.substring(2, 4)+"/";
+      var new_filename = uuid.v4();
 
-      var new_dir = UPLOAD_DESTINATION+firstfolder+secondfolder;
+      Uploads.findOne({ filename: new_filename }, function (err, result) {
+        if(result || err) {
+          console.log('🙀 UUID DUPLICATE FOUND: '+new_filename);
+          return next(new Response.error('INTERNAL_SERVER_ERROR', 'Something went wrong.'));
+        }
+        else {
+          // Splitting the filename (uuid) into folder sections.
+          // We want a no performance lag and clear vision to the root folders so we seperate the first 2 digits 2 times.
+          // Described as follows:
+          // -- 74738ff5-5367-5958-9aee-98fffdcd1876
+          // --         splitting...
+          // -- [74] [73] 8ff5-5367-5958-9aee-98fffdcd1876
+          // --         turns into
+          // -- ./74/73/8ff5-5367-5958-9aee-98fffdcd1876
 
-      new_filename += "."+file.extension;
+          var firstfolder   = new_filename.substring(0, 2)+"/";
+          var secondfolder  = new_filename.substring(2, 4)+"/";
 
-      // Create upload Object
-      var upload = new Uploads({
-        _user: req.user._id,
-        title: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size,
-        filename: new_filename,
-        destination: new_dir,
-        decryptionkey: uuid.v4()
-      });
+          var new_dir = UPLOAD_DESTINATION+firstfolder+secondfolder;
 
-      var file_move_promise = Promise.promisify(require('mv'));
+          new_filename += "."+file.extension;
 
-      file_move_promise(ROOT_DIR+file.path, new_dir+new_filename, {mkdirp: true})
-      .then(function () {
-        Uploads.create(upload)
-        .then(function (upload) {
-          req.response = new Response.ok(upload);
-          return next();
-        })
-        .catch(function (err) {
-          return next(new Response.error('INTERNAL_SERVER_ERROR', err));
-        });
-      })
-      .catch(function (err) {
-        // remove the file from 'incoming' dir if an error occured
-        fs.unlink(ROOT_DIR+file.path);
-        console.log(err);
-        return next(new Response.error('INTERNAL_SERVER_ERROR', err));
+          // Create upload Object
+          var upload = new Uploads({
+            _user: user._id,
+            title: file.originalname,
+            mimetype: file.mimetype,
+            size: file.size,
+            filename: new_filename,
+            destination: new_dir,
+            decryptionkey: uuid.v4()
+          });
+
+          var file_move_promise = Promise.promisify(require('mv'));
+
+          file_move_promise(ROOT_DIR+file.path, new_dir+new_filename, {mkdirp: true})
+          .then(function () {
+            // Saving the upload
+            Uploads.create(upload)
+            .then(function (upload) {
+              // Appending the upload to the user.uploads array
+              user.uploads.push(upload);
+              user.quota.used += upload.size;
+              user.save();
+
+              req.response = new Response.ok(upload);
+              return next();
+            })
+            .catch(function (err) {
+              return next(new Response.error('INTERNAL_SERVER_ERROR', err));
+            });
+          })
+          .catch(function (err) {
+            // remove the file from 'incoming' dir if an error occured
+            fs.unlink(ROOT_DIR+file.path, function (err) {
+              if(err) {
+                console.log(err);
+              }
+            });
+
+            return next(new Response.error('INTERNAL_SERVER_ERROR', err));
+          });
+        }
       });
     }
   });

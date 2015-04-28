@@ -91,7 +91,12 @@ app.use(function (err, req, res, next) {
 
 app.use(function (req, res, next) {
   if(req.response !== undefined) {
-    res.json(req.response);
+    if(typeof(req.response) === "object") {
+      res.json(req.response);
+    }
+    else {
+      res.send(req.response);
+    }
   }
   else {
     res.status(404);
