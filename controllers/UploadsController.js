@@ -11,10 +11,8 @@ var mongoose  = require('mongoose');
 var Response  = require('../helper/ResponseHelper');
 
 // Constants
-var UPLOAD_DESTINATION = __dirname+"/../uploads/";
-var INCOMING_DIR = __dirname+"/../incoming/";
-var ROOT_DIR = __dirname+"/../";
-
+var UPLOAD_DESTINATION  = __coreDir+"uploads/";
+var INCOMING_DIR        = __coreDir+"incoming/";
 
 module.exports.create = function (req, res, next) {
 
@@ -32,9 +30,9 @@ module.exports.create = function (req, res, next) {
 
     // deleting all files in the incoming dir
     file_uploads_keys.forEach(function (file_key) {
-      fs.unlink(ROOT_DIR+req.files[file_key].path, function (err) {
+      fs.unlink(__coreDir+req.files[file_key].path, function (err) {
         if(err) {
-          console.log(err);
+          Log.e(err);
         }
       });
     });
@@ -47,9 +45,9 @@ module.exports.create = function (req, res, next) {
 
   // Bad Request when wrong mimetype was uploaded and delete the file
   if(file.mimetype !== 'image/png' && file.mimetype !== 'image/jpeg') {
-    fs.unlink(ROOT_DIR+file.path, function (err) {
+    fs.unlink(__coreDir+file.path, function (err) {
       if(err) {
-        console.log(err);
+        Log.e(err);
       }
     });
 
@@ -58,7 +56,7 @@ module.exports.create = function (req, res, next) {
 
   Users.findOne({ _id: req.user._id }, function (err, user) {
     if(!user) {
-      console.log(err);
+      Log.e("Creat", err);
       return next(new Response.error('BAD_REQUEST', 'Something went wrong - Try to renew your Session.'));
     }
     else {
@@ -71,7 +69,7 @@ module.exports.create = function (req, res, next) {
 
       Uploads.findOne({ filename: new_filename }, function (err, result) {
         if(result || err) {
-          console.log('🙀 UUID DUPLICATE FOUND: '+new_filename);
+          console.w('🙀 UUID DUPLICATE FOUND: '+new_filename);
           return next(new Response.error('INTERNAL_SERVER_ERROR', 'Something went wrong.'));
         }
         else {
@@ -86,6 +84,8 @@ module.exports.create = function (req, res, next) {
 
           var firstfolder   = new_filename.substring(0, 2)+"/";
           var secondfolder  = new_filename.substring(2, 4)+"/";
+
+          console.log(UPLOAD_DESTINATION);
 
           var new_dir = UPLOAD_DESTINATION+firstfolder+secondfolder;
 
@@ -104,7 +104,7 @@ module.exports.create = function (req, res, next) {
 
           var file_move_promise = Promise.promisify(require('mv'));
 
-          file_move_promise(ROOT_DIR+file.path, new_dir+new_filename, {mkdirp: true})
+          file_move_promise(__coreDir+file.path, new_dir+new_filename, {mkdirp: true})
           .then(function () {
             // Saving the upload
             Uploads.create(upload)
@@ -118,14 +118,15 @@ module.exports.create = function (req, res, next) {
               return next();
             })
             .catch(function (err) {
+              Log.e(err);
               return next(new Response.error('INTERNAL_SERVER_ERROR', err));
             });
           })
           .catch(function (err) {
             // remove the file from 'incoming' dir if an error occured
-            fs.unlink(ROOT_DIR+file.path, function (err) {
+            fs.unlink(__coreDir+file.path, function (err) {
               if(err) {
-                console.log(err);
+                Log.e(err);
               }
             });
 

@@ -13,11 +13,11 @@ var expressValidator  = require('express-validator');
 var mongoose          = require('mongoose');
 var Response          = require('./helper/ResponseHelper');
 
-var env       = process.env.NODE_ENV || "development";
-var secrets   = require('./config/secrets');
+var env               = process.env.NODE_ENV || "development";
+var secrets           = require('./config/secrets');
 
-global.Log    = require('./config/logger');
-
+global.Log            = require('./config/logger');
+global.__coreDir      = __dirname+"/";
 
 // DATABASE CONNECTION
 // =========================================================
@@ -84,7 +84,6 @@ app.use(function (err, req, res, next) {
     res.json(err);
   }
   else {
-    console.log("no err");
     next();
   }
 });

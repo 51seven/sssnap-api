@@ -12,8 +12,6 @@ var env       = process.env.NODE_ENV || "development";
 
 
 
-
-
 module.exports.read = function (req, res, next) {
   Users.read(req.user._id)
   .then(function (user) {
@@ -24,7 +22,7 @@ module.exports.read = function (req, res, next) {
     return next(new Response.error('NOT_FOUND', 'User not found.'));
   })
   .catch(function (err) {
-    console.log(err);
+    L.e(err);
     return next(new Response.error('INTERNAL_SERVER_ERROR', err));
   });
 }

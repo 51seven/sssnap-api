@@ -4,8 +4,8 @@ var AuthenticationController = require('../controllers/AuthenticationController'
 var UploadsController        = require('../controllers/UploadsController');
 var UsersController          = require('../controllers/UsersController');
 
-
 var router = express.Router();
+
 
 // ROUTE: /1/
 // =========================================================
