@@ -139,6 +139,11 @@ module.exports.create = function (req, res, next) {
 module.exports.read = function (req, res, next) {
   Uploads.read(req.params.hash)
   .then(function (upload) {
+    
+
+    Log.i(upload.shortlink);
+
+
     req.response = new Response.ok(upload);
     return next();
   })

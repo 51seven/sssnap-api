@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 
 // Helper
 var google = require('../../helper/GoogleAuthHelper');
+var Response  = require('../../helper/ResponseHelper');
 
 var User = mongoose.model('User');
 
@@ -22,11 +23,11 @@ module.exports = function(req, res, next) {
     access_token = headerAuth.substring(7);
   }
   else {
-    access_token = req.param('access_token');
+    access_token = req.query.access_token;
   }
 
   if (access_token === undefined) {
-    throw new status.Forbidden('Access token not found - You have to send an access token from a supported provider in the HTTP Authorization Header or in the URL.');
+    return next(new Response.error('UNAUTHORIZED', 'AccessToken not found - You have to send an access token from a supported provider in the HTTP Authorization Header or in the URL.'));
   }
 
   google.callAPI('/oauth2/v1/tokeninfo?access_token=' + access_token, access_token)
@@ -37,12 +38,12 @@ module.exports = function(req, res, next) {
 
     // Restrict clients
     if(tokenInfo.audience ==! '407408718192.apps.googleusercontent.com' || tokenInfo.audience ==! '947766948-22hqf8ngu94rmepn5m0ucp5a6mo4jsak.apps.googleusercontent.com') {
-      throw new status.Forbidden('Client not authorized', 'The client you use is not authorized to access the API. You have to use an authorized client.');
+      return next(new Response.error('UNAUTHORIZED', 'The client you use is not authorized to access the API. You have to use an authorized client.'));
     }
 
     // Check correct scopes
     if(scopes.indexOf('https://www.googleapis.com/auth/plus.me') === -1 || scopes.indexOf('https://www.googleapis.com/auth/userinfo.email') === -1) {
-      throw new status.Forbidden('Access token with wrong scopes', 'userinfo.email and plus.me scope is required when using Google as OAuth2.0 provider.');
+      return next(new Response.error('UNAUTHORIZED', 'Access token with wrong scopes', 'userinfo.email and plus.me scope is required when using Google as OAuth2.0 provider.'));
     }
 
     // Search the user related to the AccessToken in the database
@@ -55,7 +56,7 @@ module.exports = function(req, res, next) {
       req.user = user;
     }
     else {
-      throw new status.Forbidden('User not found', 'Authorization was successful but the user isnt registered yet.');
+      return next(new Response.error('UNAUTHORIZED', 'User not found.'));
     }
 
     req.user.token_info = tokenInfo;

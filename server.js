@@ -89,18 +89,19 @@ app.use(function (err, req, res, next) {
 });
 
 app.use(function (req, res, next) {
-  if(req.response !== undefined) {
+
+  //if(req.response !== undefined) {
     if(typeof(req.response) === "object") {
       res.json(req.response);
     }
     else {
       res.send(req.response);
     }
-  }
+  /*}
   else {
     res.status(404);
     res.json(new Response.error('NOT_FOUND', "'"+req.hostname+req.originalUrl + "' not found."));
-  }
+  }*/
 });
 
 
