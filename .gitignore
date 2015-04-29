@@ -1,6 +1,8 @@
 config/secrets.js
-incoming
-uploads
+config/values.js
+incoming/*
+uploads/*
+
 
 # Created by https://www.gitignore.io
 
