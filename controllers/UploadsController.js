@@ -130,6 +130,7 @@ module.exports.create = function (req, res, next) {
               }
             });
 
+            Log.e(err);
             return next(new Response.error('INTERNAL_SERVER_ERROR', err));
           });
         }
@@ -148,6 +149,7 @@ module.exports.read = function (req, res, next) {
     return next(new Response.error('NOT_FOUND', 'Upload not found.'));
   })
   .catch(function (err) {
+    Log.e(err);
     return next(new Response.error('INTERNAL_SERVER_ERROR', err));
   });
 }
@@ -159,6 +161,7 @@ module.exports.list = function (req, res, next) {
     return next();
   })
   .catch(function (err) {
+    Log.e(err);
     return next(new Response.error('INTERNAL_SERVER_ERROR', err));
   });
 }
