@@ -1,6 +1,6 @@
 // Includes
 var Uploads   = require('sssnap-models').Uploads;
-var Users   = require('sssnap-models').Users;
+var Users     = require('sssnap-models').Users;
 var Promise   = require('bluebird');
 var fs        = require('fs');
 var uuid      = require('uuid');
@@ -9,10 +9,6 @@ var mongoose  = require('mongoose');
 
 // Helper
 var Response  = require('../helper/ResponseHelper');
-
-// Constants
-var UPLOAD_DESTINATION  = __coreDir+"uploads/";
-var INCOMING_DIR        = __coreDir+"incoming/";
 
 module.exports.create = function (req, res, next) {
 
@@ -85,7 +81,8 @@ module.exports.create = function (req, res, next) {
           var firstfolder   = new_filename.substring(0, 2)+"/";
           var secondfolder  = new_filename.substring(2, 4)+"/";
 
-          console.log(UPLOAD_DESTINATION);
+          var UPLOAD_DESTINATION  = __coreDir+"uploads/";
+          var INCOMING_DIR        = __coreDir+"incoming/";
 
           var new_dir = UPLOAD_DESTINATION+firstfolder+secondfolder;
 
@@ -171,7 +168,74 @@ module.exports.update = function (req, res, next) {
 }
 
 module.exports.delete = function (req, res, next) {
-  return next(new Response.error('NOT_IMPLEMENTED', 'Stay tuned!'));
+
+  // Getting upload id from hash
+  Uploads.findOne({ shortid: req.params.hash }, function (err, upload) {
+
+    if(!upload) {
+      return next(new Response.error('NOT_FOUND', 'Upload not found.'));
+    }
+
+    console.log(typeof req.user._id + " / " + req.user._id);
+    console.log(typeof upload._user + " / " + upload._user);
+
+    // Check if user belongs to this upload
+    if(req.user._id === upload._user) {
+      console.log("nope");
+
+      return next(new Response.error('UNAUTHORIZED', 'Unable to delete this upload.'));
+    }
+    else {
+      Users.read(upload._user)
+      .then(function (user) {
+        // Delete upload from db
+        var upload_fs_ref = upload.destination+upload.filename; // Path + filename
+        var upload_size = upload.size;
+        var upload_id = upload._id;
+
+        Uploads.delete(upload._id)
+        .then(function () {
+        
+          // remove file from filesystem
+          fs.unlink(upload_fs_ref, function (err) {
+            if(err) {
+              Log.e(err);
+              return next(new Response.error('INTERNAL_SERVER_ERROR', 'Unable to delete the file.'));
+            }
+            else {
+              // remove from uploads.array
+              var index = user.uploads.indexOf(upload_id);
+
+              if (index > -1) {
+                // remove from refs
+                user.uploads.splice(index, 1);
+                
+                // Adjust User quota
+                user.quota.used -= upload_size;
+
+                // save the updates 
+                user.save();
+              }
+              else {
+                Log.e(upload_id, 'not found in user.uploads');
+              }
+
+              req.response = new Response.ok();
+              return next();
+            }
+          });
+        })
+        .catch(function (err) {
+          return next(new Response.error('INTERNAL_SERVER_ERROR', 'Unable to delete this upload.'));  
+        });
+      })
+      .catch(function (err) {
+
+      });
+    }
+  });
+
+//  return next(new Response.error('NOT_IMPLEMENTED', 'Stay tuned!'));
 }
 
 
